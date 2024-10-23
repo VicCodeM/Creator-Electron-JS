@@ -119,53 +119,98 @@ class CrearProyecto:
     def generar_main_js(self, proyecto_dir):
         """Genera el archivo main.js del proyecto Electron."""
         with open(os.path.join(proyecto_dir, 'main.js'), 'w') as f:
-            f.write('''const { app, BrowserWindow } = require('electron')
-const path = require('path')
+            f.write('''const { app, BrowserWindow } = require('electron');
+const path = require('path');
 
-function createWindow () {
+function createWindow() {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
+      preload: path.join(__dirname, 'preload.js') // Preload script for security
     }
-  })
+  });
 
-  win.loadFile('index.html')
+  win.loadFile('index.html');
 }
 
+// App lifecycle events
 app.whenReady().then(() => {
-  createWindow()
+  createWindow();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
+      createWindow();
     }
-  })
-})
+  });
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit()
+    app.quit();
   }
-})
+});
 ''')
 
     def generar_index_html(self, proyecto_dir):
         """Genera el archivo index.html del proyecto."""
-        with open(os.path.join(proyecto_dir, 'index.html'), 'w') as f:
+        with open(os.path.join(proyecto_dir, 'index.html'), 'w',encoding='utf-8') as f:
             f.write('''<!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{}</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Bienvenido al proyecto Electron</h1>
-    <p>Este es un proyecto básico creado con el asistente de creación de proyectos.</p>
+    <header>
+        <h1>Bienvenido a {}</h1>
+    </header>
+    <main>
+        <p>Este es un proyecto básico creado con el asistente de creación de proyectos.</p>
+    </main>
+    <footer>
+        <p>&copy; 2024 Su Nombre. Todos los derechos reservados.</p>
+    </footer>
 </body>
 </html>
-'''.format(self.nombre_proyecto))
+'''.format(self.nombre_proyecto, self.nombre_proyecto))
+
+    def generar_styles_css(self, proyecto_dir):
+        """Genera un archivo styles.css básico para el estilo del proyecto."""
+        with open(os.path.join(proyecto_dir, 'styles.css'), 'w') as f:
+            f.write('''body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background: #35424a;
+    color: #ffffff;
+    padding: 10px 0;
+    text-align: center;
+}
+
+main {
+    padding: 20px;
+}
+
+footer {
+    text-align: center;
+    padding: 10px 0;
+    background: #35424a;
+    color: #ffffff;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+''')
 
     def instalar_dependencias(self, proyecto_dir):
         """Instala las dependencias del proyecto usando npm."""
@@ -198,22 +243,21 @@ app.on('window-all-closed', () => {
             return False
 
     def crear_proyecto(self):
-        """Orquesta la creación del proyecto."""
+        """Crea el proyecto de Electron."""
+        print(Fore.GREEN + f"Creando el proyecto de Electron: '{self.nombre_proyecto}'..." + Style.RESET_ALL)
         proyecto_dir = self.crear_directorio_proyecto()
         self.generar_package_json(proyecto_dir)
         self.generar_main_js(proyecto_dir)
         self.generar_index_html(proyecto_dir)
+        self.generar_styles_css(proyecto_dir)
 
         if self.instalar_dependencias(proyecto_dir):
-            print(Fore.GREEN + f"El proyecto '{self.nombre_proyecto}' se creó correctamente." + Style.RESET_ALL)
+            print(Fore.GREEN + f"Proyecto '{self.nombre_proyecto}' creado con éxito." + Style.RESET_ALL)
+            print(Fore.GREEN + "Ejecute 'npm start' para iniciar su aplicación Electron." + Style.RESET_ALL)
+        else:
+            print(Fore.RED + "Hubo un problema al crear el proyecto." + Style.RESET_ALL)
 
-def main():
-    """Función principal del script."""
-    crear_proyecto = CrearProyecto()
-    crear_proyecto.crear_proyecto()
-
-    input(Fore.CYAN + "Presione Enter para salir..." + Style.RESET_ALL)
-
-# Punto de entrada del script
 if __name__ == "__main__":
-    main()
+    proyecto = CrearProyecto()
+    proyecto.crear_proyecto()
+    input(Fore.CYAN + "Presione 'Enter' para salir..." + Style.RESET_ALL)  # Permitir salir presionando Enter

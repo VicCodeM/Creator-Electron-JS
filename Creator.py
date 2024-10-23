@@ -97,24 +97,39 @@ class CrearProyecto:
         package_json = {
             "name": self.nombre_proyecto,
             "version": "1.0.0",
+            "description": "Proyecto de Electron {self.nombre_proyecto}",  # Agregar descripción
+            "author": "Victor Maldonado",  # Agregar autor
             "main": "main.js",
             "scripts": {
-                "start": "electron ."
+                "start": "electron .",
+                "build": "electron-builder --win",
+                "dev": "electron .",
+                "test": "jest"  
             },
-            "dependencies": {
-                "electron": "*"
-            }
+            "devDependencies": {
+                "electron": "*",  # Cambia aquí para usar una versión específica
+                "electron-builder": "*",  # Cambia aquí para usar una versión específica
+                "electron-devtools-installer": "*",
+                "jest": "^27.0.0" 
+
+            },
+            "jest": {
+                "testEnvironment": "node"
+            },
+            "dependencies": {}
         }
 
         if "sqlite" in self.tipos_db_seleccionados:
-            package_json["dependencies"]["sqlite3"] = "*"
+            package_json["dependencies"]["sqlite3"] = "latest"
         if "mysql" in self.tipos_db_seleccionados:
-            package_json["dependencies"]["mysql"] = "*"
+            package_json["dependencies"]["mysql"] = "latest"
         if "mssql" in self.tipos_db_seleccionados:
-            package_json["dependencies"]["mssql"] = "*"
+            package_json["dependencies"]["mssql"] = "latest"
 
         with open(os.path.join(proyecto_dir, 'package.json'), 'w', encoding='utf-8') as f:
             json.dump(package_json, f, ensure_ascii=False, indent=4)
+
+
 
     def generar_main_js(self, proyecto_dir):
         """Genera el archivo main.js del proyecto Electron."""
